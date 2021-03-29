@@ -38,7 +38,6 @@ class BaseParser:
             name_list = i.split(",")
             for j in name_list:
                 self.repository[j] = []
-
         for key in self.repository.keys():
             if re.search("\d+", key):
                 key_list = key.split("_")
@@ -64,15 +63,13 @@ class BaseParser:
             element_tag = ".//{http://www.3gpp.org/ftp/specs/archive/32_series/32.435#measCollec}measCollec"
             answer = self.tree.findall(element_tag)
             element = answer[1].attrib
-
             string = element.get("endTime", "no keys")
             date = re.sub(r"[^0-9]", "", string)
             self.repository["DATETIME"].append(date)
-
         else:
             self.repository["DATETIME"].append(self.repository["DATETIME"][0])
 
-    def parser_data(self, search, answer, i) -> None:
+    def parser_data(self, search: str, answer: str, i: int) -> None:
         attrib_dict = {}
         for j in range(len(answer[i])):
             if answer[i][j].text != None:
@@ -139,13 +136,10 @@ class BaseParser:
         for item in range(len(answer)):
             if answer[item].attrib["measInfoId"].endswith(search_name):
                 index_list.append(int(item))
-        # выполняем парсинг второй части search_name
-        i = index_list[1]
-        self.parser_name(search, answer, i)
         for i in index_list:
             self.parser_data(search, answer, i)
 
-    def save_file(self, folder_name, file_name) -> None:
+    def save_file(self, folder_name: str, file_name: str) -> None:
         """Функция для сохранения данных в файл csv"""
         os.mkdir(f"{folder_name}")
         with open(f"{folder_name}/{file_name}.csv", "w") as f:
@@ -213,7 +207,7 @@ class EDchResources(BaseParser):
 
 
 class EUtranCellFDD(BaseParser):
-    def parser_name(self, search, answer, i) -> None:
+    def parser_name(self, search: str, answer: str, i: int) -> None:
         for j in range(len(answer[i])):
             if search in answer[i][j].attrib:
 
@@ -233,17 +227,15 @@ class EUtranCellFDD(BaseParser):
                 ENodeBFunction = re.search(
                     r"(?<=ENodeBFunction=).*?(?=,)", string
                 ).group(0)
-                # self.repository.setdefault('NodeBFunction', list([NodeBFunction]))
                 self.repository["ENodeBFunction"].append(ENodeBFunction)
                 EUtranCellFDD = re.search(r"(?<=EUtranCellFDD=).*?(?=$)", string).group(
                     0
                 )
-                # self.repository.setdefault('EUtranCellFDD', [EUtranCellFDD])
                 self.repository["EUtranCellFDD"].append(EUtranCellFDD)
 
 
 class HsDschResources(BaseParser):
-    def parser_name(self, search, answer, i) -> None:
+    def parser_name(self, search: str, answer: str, i: int) -> None:
         for j in range(len(answer[i])):
             if search in answer[i][j].attrib:
 
@@ -271,7 +263,7 @@ class HsDschResources(BaseParser):
 
 
 class HsDschResources_2(BaseParser):
-    def parser_name(self, search, answer, i) -> None:
+    def parser_name(self, search: str, answer: str, i: int) -> None:
         for j in range(len(answer[i])):
             if search in answer[i][j].attrib:
 
@@ -299,7 +291,7 @@ class HsDschResources_2(BaseParser):
 
 
 class UtranCellRelation(BaseParser):
-    def parser_name(self, search, answer, i) -> None:
+    def parser_name(self, search: str, answer: str, i: int) -> None:
         for j in range(len(answer[i])):
             if search in answer[i][j].attrib:
                 PT900S = answer[8][2].attrib["duration"]
@@ -347,7 +339,6 @@ BbProcessingResource_object.save_file(
     "ERAN3GNDB94_20201218133919_202012181315_1330_0500_RAN_59_BTS_59_01218_ULN_BbProcessingResource",
 )
 
-
 # EDchResources
 name_file_read = "in/ERAN3GNDB94_20201218133919_202012181315_1330_0500_RAN_59_BTS_59_01218_ULN_statsfile.bin"
 name_file_write = "out/EDchResources/ERAN3GNDB94_20201218133919_202012181315_1330_0500_RAN_59_BTS_59_01218_ULN_EDchResources.csv"
@@ -358,7 +349,6 @@ EDchResources_object.save_file(
     "test____EDchResources",
     "ERAN3GNDB94_20201218133919_202012181315_1330_0500_RAN_59_BTS_59_01218_ULN_EDchResources.csv",
 )
-
 
 # EUtranCellFDD
 name_file_read = "in/ERAN3GNDB94_20201218133919_202012181315_1330_0500_RAN_59_BTS_59_01218_ULN_statsfile.bin"
@@ -371,15 +361,16 @@ EUtranCellFDD_object.save_file(
     "ERAN3GNDB94_20201218133919_202012181315_1330_0500_RAN_59_BTS_59_01218_ULN_EUtranCellFDD.csv",
 )
 
-
 # HsDschResources
 name_file_read = "in/ERAN3GNDB94_20201218133919_202012181315_1330_0500_RAN_59_BTS_59_01218_ULN_statsfile.bin"
 name_file_write = "out/HsDschResources/ERAN3GNDB94_20201218133919_202012181315_1330_0500_RAN_59_BTS_59_01218_ULN_HsDschResources.csv"
 HsDschResources_object = HsDschResources(name_file_read)
 HsDschResources_object.data_preparation(name_file_write)
 HsDschResources_object.base_parser("HsDschResources")
-HsDschResources_object
-
+HsDschResources_object.save_file(
+    "test____HsDschResources",
+    "ERAN3GNDB94_20201218133919_202012181315_1330_0500_RAN_59_BTS_59_01218_ULN_HsDschResources.csv",
+)
 
 # UtranCellRelation
 name_file_read = "in/ERAN3GNDB94_20201218133919_202012181315_1330_0500_RAN_59_BTS_59_01218_ULN_statsfile.bin"
